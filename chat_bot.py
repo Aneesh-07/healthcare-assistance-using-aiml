@@ -14,6 +14,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 training = pd.read_csv('Data/Training.csv')
 testing= pd.read_csv('Data/Testing.csv')
+doc_dataset = pd.read_csv('Data/doctors_dataset.csv')
 cols= training.columns
 cols= cols[:-1]
 x = training[cols]
@@ -37,17 +38,17 @@ testy    = le.transform(testy)
 
 clf1  = DecisionTreeClassifier()
 clf = clf1.fit(x_train,y_train)
-print(clf.score(x_train,y_train))
-print ("cross result========")
+# print(clf.score(x_train,y_train))
+# print ("cross result========")
 scores = cross_val_score(clf, x_test, y_test, cv=3)
 # print (scores)
-print (scores.mean())
+# print (scores.mean())
 
 
 model=SVC()
 model.fit(x_train,y_train)
-print("for svm: ")
-print(model.score(x_test,y_test))
+# print("for svm: ")
+# print(model.score(x_test,y_test))
 
 importances = clf.feature_importances_
 indices = np.argsort(importances)[::-1]
@@ -77,9 +78,9 @@ def calc_condition(exp,days):
     for item in exp:
          sum=sum+severityDictionary[item]
     if((sum*days)/(len(exp)+1)>13):
-        print("You should take the consultation from doctor. ")
+        print("\nYou should take the consultation from doctor. ")
     else:
-        print("It might not be that bad but you should take precautions.")
+        print("\nIt might not be that bad but you should take precautions.")
 
 
 def getDescription():
@@ -214,7 +215,7 @@ def tree_to_code(tree, feature_names):
                 recurse(tree_.children_right[node], depth + 1)
         else:
             present_disease = print_disease(tree_.value[node])
-            # print( "You may have " +  present_disease )
+            print( "\nYou may have " ,  present_disease )
             red_cols = reduced_data.columns 
             symptoms_given = red_cols[reduced_data.loc[present_disease].values[0].nonzero()]
             # dis_list=list(symptoms_present)
@@ -239,20 +240,67 @@ def tree_to_code(tree, feature_names):
             # print(second_prediction)
             calc_condition(symptoms_exp,num_days)
             if(present_disease[0]==second_prediction[0]):
-                print("You may have ", present_disease[0])
-                print(description_list[present_disease[0]])
+                                            
+                print("\nYou may have ", present_disease[0]+"\n")
+                
+                if present_disease[0] in description_list:
+                    print(present_disease[0]+" -> ",description_list[present_disease[0]]+"\n")
+                else:
+                    print("Description not available for", present_disease[0]+"\n")
+                    
+                try:
+                    doc = doc_dataset[doc_dataset['Prognosis'] == present_disease[0]]['Name'].values[0]
+                    doc_link = doc_dataset[doc_dataset['Prognosis'] == present_disease[0]]['Description'].values[0]
+                    med = doc_dataset[doc_dataset['Prognosis'] == present_disease[0]]['Medicine'].values[0]
+                    print("Doctor Specialist ->",doc)
+                    print("Related Medicine ->",med+"\nNote: Don't take medicine without consulting doctor this is just for knowledge")
+                    print("For doctor's information and apointment open this -> ",doc_link+"\n")
+                except:
+                    print("No data for specialist doctor. Contact hospital for further information.\n")
+                
+                    
+                
+                
 
                 # readn(f"You may have {present_disease[0]}")
                 # readn(f"{description_list[present_disease[0]]}")
 
             else:
-                print("You may have ", present_disease[0], "or ", second_prediction[0])
+                print("\nYou may have ", present_disease[0], "or ", second_prediction[0]+"\n")
+                
+                
+                if present_disease[0] in description_list:
+                    print(present_disease[0]+" -> ",description_list[present_disease[0]]+"\n")
+                else:
+                    print("Description not available for", present_disease[0]+"\n")
+                
+                try:
+                    doc = doc_dataset[doc_dataset['Prognosis'] == present_disease[0]]['Name'].values[0]
+                    doc_link = doc_dataset[doc_dataset['Prognosis'] == present_disease[0]]['Description'].values[0]
+                    med = doc_dataset[doc_dataset['Prognosis'] == present_disease[0]]['Medicine'].values[0]
+                    print("Doctor Specialist ->",doc)
+                    print("Related Medicine ->",med+"\nNote: Don't take medicine without consulting doctor this is just for knowledge")
+                    print("For doctor's information and apointment open this -> ",doc_link+"\n")
+                except:
+                    print("No data for specialist doctor. Contact hospital for further information.\n")
+                    
+                    
                 if second_prediction[0] in description_list:
-                    print(description_list[second_prediction[0]])
+                    print(second_prediction[0]+" -> ",description_list[second_prediction[0]],"\n")
                 else:
                     print("Description not available for", second_prediction[0])
-
-
+                try:
+                    doc = doc_dataset[doc_dataset['Prognosis'] == second_prediction[0]]['Name'].values[0]
+                    doc_link = doc_dataset[doc_dataset['Prognosis'] == second_prediction[0]]['Description'].values[0]
+                    med = doc_dataset[doc_dataset['Prognosis'] == second_prediction[0]]['Medicine'].values[0]
+                    print("Doctor Specialist ->",doc)
+                    print("Related Medicine ->",med+"\n Note: Don't take medicine without consulting doctor this is just for knowledge")
+                    print("For doctor's information and apointment open this -> ",doc_link+"\n")
+                except:
+                    print("No data for specialist doctor. Contact hospital for further information.\n")
+                    
+                    
+                
             # print(description_list[present_disease[0]])
             precution_list=precautionDictionary[present_disease[0]]
             print("Take following measures : ")
